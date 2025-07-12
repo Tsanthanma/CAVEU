@@ -10,6 +10,7 @@ const Registro = () => {
     apellidos: "",
     tipoDocumento: "",
     documento: "",
+    email: "",
     pais: "",
     prefijo: "+57",
     telefono: "",
@@ -41,57 +42,64 @@ const Registro = () => {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  const regexPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+    const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const regexPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 
-  if (!regexPassword.test(form.password)) {
-    setErrorContraseña(
-      "La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número."
-    );
-    return;
-  }
-
-  if (form.password !== form.confirmPassword) {
-    setErrorContraseña("⚠️ Las contraseñas no coinciden.");
-    return;
-  }
-
-  setErrorContraseña("");
-
-  const nuevoUsuario = {
-    tipo: form.tipo,
-    nombres: form.nombres,
-    apellidos: form.apellidos,
-    tipoDocumento: form.tipoDocumento,
-    documento: form.documento,
-    pais: form.pais,
-    prefijo: form.prefijo,
-    telefono: form.telefono,
-    direccion: form.direccion,
-    password: form.password,
-  };
-
-  try {
-    const respuesta = await fetch("http://localhost:3000/api/auth/registro", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(nuevoUsuario),
-    });
-
-    const data = await respuesta.json();
-
-    if (respuesta.ok) {
-      alert("✅ Registro exitoso. Ya puedes iniciar sesión.");
-      navigate("/");
-    } else {
-      alert(data.msg || "❌ Error en el registro.");
+    if (!regexEmail.test(form.email)) {
+      alert("Por favor ingresa un correo electrónico válido.");
+      return;
     }
-  } catch (error) {
-    console.error("Error:", error);
-    alert("❌ Error al conectar con el servidor.");
-  }
-};
+
+    if (!regexPassword.test(form.password)) {
+      setErrorContraseña(
+        "La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número."
+      );
+      return;
+    }
+
+    if (form.password !== form.confirmPassword) {
+      setErrorContraseña("⚠️ Las contraseñas no coinciden.");
+      return;
+    }
+
+    setErrorContraseña("");
+
+    const nuevoUsuario = {
+      tipo: form.tipo,
+      nombres: form.nombres,
+      apellidos: form.apellidos,
+      tipoDocumento: form.tipoDocumento,
+      documento: form.documento,
+      email: form.email,
+      pais: form.pais,
+      prefijo: form.prefijo,
+      telefono: form.telefono,
+      direccion: form.direccion,
+      password: form.password,
+    };
+
+    try {
+      const respuesta = await fetch("http://localhost:5000/api/auth/registro", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(nuevoUsuario),
+      });
+
+      const data = await respuesta.json();
+
+      if (respuesta.ok) {
+        alert("✅ Registro exitoso. Ya puedes iniciar sesión.");
+        navigate("/");
+      } else {
+        alert(data.msg || "❌ Error en el registro.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("❌ Error al conectar con el servidor.");
+    }
+  };
 
   return (
     <>
@@ -174,6 +182,18 @@ const Registro = () => {
                   />
                 </div>
 
+                <div className="registro-form-full">
+                  <label>Correo electrónico:</label>
+                  <input
+                    type="email"
+                    name="email"
+                    className="registro-input"
+                    value={form.email}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+
                 <div>
                   <label>País:</label>
                   <select
@@ -214,6 +234,7 @@ const Registro = () => {
                   <input
                     type="tel"
                     name="telefono"
+                    className="registro-input"
                     value={form.telefono}
                     onChange={handleChange}
                     required
@@ -276,7 +297,9 @@ const Registro = () => {
               </div>
 
               <div className="register-link">
-                <p>¿Ya tienes una cuenta? <Link to="/">Iniciar Sesión</Link></p>
+                <p>
+                  ¿Ya tienes una cuenta? <Link to="/">Iniciar Sesión</Link>
+                </p>
               </div>
             </form>
           </section>

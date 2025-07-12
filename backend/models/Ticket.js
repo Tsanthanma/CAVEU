@@ -1,36 +1,37 @@
-// models/Ticket.js
-const mongoose = require("mongoose");
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+const Usuario = require('./Usuario');
 
-const ticketSchema = new mongoose.Schema(
-  {
-    usuario: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Usuario",
-      required: true,
-    },
-    pregunta: {
-      type: String,
-      required: true,
-    },
-    archivo: {
-      type: String, // Nombre del archivo guardado (ej: uploads/archivo.pdf)
-    },
-    estado: {
-      type: String,
-      enum: ["pendiente", "en proceso", "resuelto"],
-      default: "pendiente",
-    },
-    area: {
-      type: String, // Área asignada (medicina, ingenierías, etc.)
-    },
-    asesor: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Usuario", // En caso de asignación a un asesor
-    },
+const Ticket = sequelize.define('Ticket', {
+  pregunta: {
+    type: DataTypes.STRING,
+    allowNull: false
   },
-  {
-    timestamps: true, // createdAt, updatedAt
+  archivo: {
+    type: DataTypes.STRING
+  },
+  estado: {
+    type: DataTypes.ENUM('pendiente', 'en proceso', 'resuelto'),
+    defaultValue: 'pendiente'
+  },
+  area: {
+    type: DataTypes.STRING
   }
-);
+}, {
+  timestamps: true
+});
 
-module.exports = mongoose.model("Ticket", ticketSchema);
+// Relaciones con Usuario
+Ticket.belongsTo(Usuario, {
+  as: 'usuario',          // Quien creó el ticket
+  foreignKey: 'usuarioId',
+  onDelete: 'CASCADE'
+});
+
+Ticket.belongsTo(Usuario, {
+  as: 'asesor',           // Asesor asignado
+  foreignKey: 'asesorId',
+  allowNull: true
+});
+
+module.exports = Ticket;

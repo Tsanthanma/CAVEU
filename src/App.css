@@ -200,6 +200,34 @@ footer {
   box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.25);
 }
 
+
+.registro-input,
+.registro-select,
+textarea {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+  margin-bottom: 10px;
+  font-family: inherit;
+}
+
+.registro-input,
+.registro-select,
+textarea {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+  margin-bottom: 10px;
+  font-family: inherit;
+}
+
+
 .input-password-wrapper {
   position: relative;
   width: 100%;
@@ -222,4 +250,22 @@ footer {
   cursor: pointer;
   font-size: 18px;
   padding: 0;
+}
+
+
+/*Logout boton*/
+
+.btn.logout {
+  background-color: #cc0000;
+  color: white;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background 0.3s ease;
+}
+
+.btn.logout:hover {
+  background-color: #990000;
 }

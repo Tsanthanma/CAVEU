@@ -158,7 +158,7 @@ const Dashboard = () => {
     if (archivo) formData.append("archivo", archivo);
 
     try {
-      const res = await fetch("http://localhost:3001/api/consultas", {
+      const res = await fetch("http://localhost:3000/api/consultas", {
         method: "POST",
         body: formData,
       });

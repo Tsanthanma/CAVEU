@@ -1,35 +1,41 @@
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
-const connectDB = require("./config/db");
+const sequelize = require("./config/db"); // importamos Sequelize
 
 // Cargar variables de entorno
 dotenv.config();
 
-// Conectar a la base de datos
-connectDB();
-
-// Crear la app de Express
+// Inicializar Express
 const app = express();
 
-// Middleware para permitir solicitudes desde el frontend (localhost:3001)
+// Middleware CORS para frontend en localhost:3000
 app.use(cors({
-  origin: "http://localhost:3001", // Dirección del frontend
+  origin: "http://localhost:3000",
   credentials: true
 }));
 
-// Middleware para analizar JSON
+// Middleware para leer JSON
 app.use(express.json());
 
-// Rutas de autenticación
+// Rutas
 app.use("/api/auth", require("./routes/authRoutes"));
-
-// Rutas de tickets
 app.use("/api/tickets", require("./routes/ticketRoutes"));
 
-// Puerto en el que correrá el servidor (por defecto 5000)
+// Puerto
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`🟢 Servidor corriendo en http://localhost:${PORT}`);
-});
+// Conexión con MySQL y levantar servidor
+sequelize.authenticate()
+  .then(() => {
+    console.log("✅ Conectado a MySQL con Sequelize");
+    return sequelize.sync({ force: false }); // Cambia a true si quieres borrar y recrear las tablas
+  })
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`🟢 Servidor corriendo en http://localhost:5000`);
+    });
+  })
+  .catch((err) => {
+    console.error("❌ Error conectando a MySQL:", err);
+  });

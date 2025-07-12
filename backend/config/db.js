@@ -1,13 +1,11 @@
-const mongoose = require("mongoose");
+// backend/config/db.js
 
-const connectDB = async () => {
-  try {
-    await mongoose.connect(process.env.MONGO_URI);
-    console.log("📦 MongoDB conectado correctamente");
-  } catch (error) {
-    console.error("❌ Error al conectar MongoDB", error);
-    process.exit(1);
-  }
-};
+const { Sequelize } = require('sequelize');
 
-module.exports = connectDB;
+const sequelize = new Sequelize('caveu_db', 'root', '12345678', {
+  host: 'localhost',
+  dialect: 'mysql',
+  logging: false, // Opcional: desactiva los logs SQL en consola
+});
+
+module.exports = sequelize;

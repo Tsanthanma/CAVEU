@@ -1,25 +1,63 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../config/db");
 
-const usuarioSchema = new mongoose.Schema({
+const Usuario = sequelize.define("Usuario", {
   tipo: {
-    type: String,
-    enum: ["estudiante", "empresa", "admin", "asesor"],
-    required: true,
+    type: DataTypes.STRING,
+    allowNull: false,
   },
-  nombres: { type: String, required: true },
-  apellidos: { type: String, required: true },
-  tipoDocumento: { type: String, required: true },
-  documento: { type: String, required: true, unique: true },
-  pais: { type: String },
-  prefijo: { type: String },
-  telefono: { type: String },
-  direccion: { type: String },
-  password: { type: String, required: true },
+  nombres: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  apellidos: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  tipoDocumento: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  documento: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true,
+  },
+  email: {
+  type: DataTypes.STRING,
+  allowNull: false,
+  unique: true,
+  validate: {
+    isEmail: true
+  }
+},
+  pais: {
+    type: DataTypes.STRING,
+  },
+  prefijo: {
+    type: DataTypes.STRING,
+  },
+  telefono: {
+    type: DataTypes.STRING,
+  },
+  direccion: {
+    type: DataTypes.TEXT,
+  },
+  password: {
+    type: DataTypes.TEXT,
+    allowNull: false,
+  },
   rol: {
-    type: String,
-    enum: ["cliente", "asesor", "admin"],
-    default: "cliente",
+  type: DataTypes.STRING,
+  allowNull: false,
+  defaultValue: "cliente",
+  validate: {
+    isIn: [["cliente", "asesor", "admin"]],
   },
-}, { timestamps: true });
+},
+}, {
+  tableName: "usuarios", // ⚠️ DEBE coincidir con tu tabla
+  timestamps: false      // si tu tabla no usa createdAt y updatedAt
+});
 
-module.exports = mongoose.model("Usuario", usuarioSchema);
+module.exports = Usuario;
