@@ -1,7 +1,5 @@
 import React, { useState } from "react";
 import "./App.css";
-import DashboardCliente from "./routes/DashboardCliente";
-
 import {
   BrowserRouter as Router,
   Routes,
@@ -9,7 +7,11 @@ import {
   Link,
   useNavigate,
 } from "react-router-dom";
+
 import Registro from "./routes/Registro";
+import DashboardCliente from "./routes/DashboardCliente";
+import DashboardAdmin from "./routes/DashboardAdmin";
+import DashboardAsesor from "./routes/DashboardAsesor";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 // ----------------------
@@ -38,7 +40,16 @@ const Login = () => {
         localStorage.setItem("token", data.token);
         localStorage.setItem("usuario", JSON.stringify(data.usuario));
         alert("¡Inicio de sesión exitoso!");
-        navigate("/dashboard");
+
+        // ✅ Redirigir según el rol
+        const rol = data.usuario.rol;
+        if (rol === "admin") {
+          navigate("/dashboard/admin");
+        } else if (rol === "asesor") {
+          navigate("/dashboard/asesor");
+        } else {
+          navigate("/dashboard/cliente");
+        }
       } else {
         alert(data.msg || "Usuario o contraseña incorrectos");
       }
@@ -126,113 +137,6 @@ const Login = () => {
 };
 
 // ----------------------
-// Dashboard protegido
-// ----------------------
-const Dashboard = () => {
-  const usuario = JSON.parse(localStorage.getItem("usuario"));
-  const navigate = useNavigate();
-  const [pregunta, setPregunta] = useState("");
-  const [archivo, setArchivo] = useState(null);
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("usuario");
-    navigate("/");
-  };
-
-  const handleFileChange = (e) => {
-    setArchivo(e.target.files[0]);
-  };
-
-  const handleSubmitConsulta = async (e) => {
-    e.preventDefault();
-
-    if (!pregunta && !archivo) {
-      alert("Debes escribir una pregunta o adjuntar un documento.");
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append("pregunta", pregunta);
-    formData.append("usuarioId", usuario._id);
-    if (archivo) formData.append("archivo", archivo);
-
-    try {
-      const res = await fetch("http://localhost:3000/api/consultas", {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await res.json();
-      if (res.ok) {
-        alert("Consulta enviada correctamente.");
-        setPregunta("");
-        setArchivo(null);
-      } else {
-        alert(data.msg || "Error al enviar la consulta.");
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Error de conexión al enviar la consulta.");
-    }
-  };
-
-  return (
-    <div className="container">
-      <h2>Bienvenido, {usuario?.nombres || "Usuario"} 👋</h2>
-      <p>Tipo: {usuario?.tipo}</p>
-
-      {usuario?.tipo === "estudiante" || usuario?.tipo === "empresa" ? (
-        <form onSubmit={handleSubmitConsulta} className="form-box">
-          <label htmlFor="pregunta">Tu pregunta:</label>
-          <textarea
-            id="pregunta"
-            name="pregunta"
-            rows="5"
-            value={pregunta}
-            onChange={(e) => setPregunta(e.target.value)}
-            placeholder="Escribe tu consulta aquí..."
-            required={!archivo}
-            style={{
-              width: "100%",
-              padding: "10px",
-              fontSize: "1rem",
-              marginBottom: "15px",
-              borderRadius: "6px",
-              border: "1px solid #ccc",
-            }}
-          ></textarea>
-
-          <label htmlFor="archivo">Adjuntar documento:</label>
-          <input
-            type="file"
-            id="archivo"
-            name="archivo"
-            accept=".pdf,.doc,.docx,.jpg,.png"
-            onChange={handleFileChange}
-          />
-
-          <div className="form-actions">
-            <button type="submit" className="btn primary">
-              Enviar consulta
-            </button>
-          </div>
-        </form>
-      ) : (
-        <p>No tienes permisos para enviar consultas.</p>
-      )}
-
-      <button
-        onClick={handleLogout}
-        className="btn primary"
-        style={{ marginTop: "20px" }}
-      >
-        Cerrar sesión
-      </button>
-    </div>
-  );
-};
-// ----------------------
 // Enrutamiento general
 // ----------------------
 const App = () => {
@@ -241,11 +145,35 @@ const App = () => {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/registro" element={<Registro />} />
+        <Route path="/dashboard-admin" element={<DashboardAdmin />} />
+
+
+        {/* Cliente */}
         <Route
-          path="/dashboard"
+          path="/dashboard/cliente"
           element={
             <ProtectedRoute>
               <DashboardCliente />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Admin */}
+        <Route
+          path="/dashboard/admin"
+          element={
+            <ProtectedRoute>
+              <DashboardAdmin />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Asesor */}
+        <Route
+          path="/dashboard/asesor"
+          element={
+            <ProtectedRoute>
+              <DashboardAsesor />
             </ProtectedRoute>
           }
         />

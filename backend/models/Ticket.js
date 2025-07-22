@@ -21,15 +21,15 @@ const Ticket = sequelize.define('Ticket', {
   timestamps: true
 });
 
-// Relaciones con Usuario
+// Relaciones
 Ticket.belongsTo(Usuario, {
-  as: 'usuario',          // Quien creó el ticket
+  as: 'usuario',
   foreignKey: 'usuarioId',
   onDelete: 'CASCADE'
 });
 
 Ticket.belongsTo(Usuario, {
-  as: 'asesor',           // Asesor asignado
+  as: 'asesor',
   foreignKey: 'asesorId',
   allowNull: true
 });

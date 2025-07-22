@@ -1,4 +1,3 @@
-// backend/routes/ticketRoutes.js
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
@@ -20,23 +19,26 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// Crear un nuevo ticket
+// Crear un nuevo ticket (válido para Sequelize)
 router.post('/', verifyToken, upload.single('archivo'), async (req, res) => {
   try {
     const { pregunta } = req.body;
     const archivoUrl = req.file ? req.file.filename : null;
 
-    const nuevoTicket = new Ticket({
-      usuario: req.usuarioId,
+    if (!pregunta && !archivoUrl) {
+      return res.status(400).json({ msg: 'Debe escribir una pregunta o adjuntar un archivo.' });
+    }
+
+    const nuevoTicket = await Ticket.create({
+      usuarioId: req.usuarioId,
       pregunta,
       archivo: archivoUrl,
-      estado: 'pendiente',
+      estado: 'pendiente'
     });
 
-    await nuevoTicket.save();
     res.status(201).json({ msg: 'Ticket creado exitosamente', ticket: nuevoTicket });
   } catch (error) {
-    console.error(error);
+    console.error("Error al crear ticket:", error);
     res.status(500).json({ msg: 'Error al crear el ticket' });
   }
 });
