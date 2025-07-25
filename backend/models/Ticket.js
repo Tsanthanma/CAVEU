@@ -1,3 +1,4 @@
+// src/models/Ticket.js
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 const Usuario = require('./Usuario');
@@ -5,7 +6,7 @@ const Usuario = require('./Usuario');
 const Ticket = sequelize.define('Ticket', {
   pregunta: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: true // Permitir nulo si solo se envía archivo
   },
   archivo: {
     type: DataTypes.STRING
@@ -16,6 +17,15 @@ const Ticket = sequelize.define('Ticket', {
   },
   area: {
     type: DataTypes.STRING
+  },
+  // IDs para las relaciones
+  usuarioId: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
+  asesorId: {
+    type: DataTypes.INTEGER,
+    allowNull: true
   }
 }, {
   timestamps: true

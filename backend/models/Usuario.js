@@ -1,3 +1,4 @@
+// backend/models/Usuario.js
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/db");
 
@@ -24,13 +25,13 @@ const Usuario = sequelize.define("Usuario", {
     unique: true,
   },
   email: {
-  type: DataTypes.STRING,
-  allowNull: false,
-  unique: true,
-  validate: {
-    isEmail: true
-  }
-},
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true,
+    validate: {
+      isEmail: true
+    }
+  },
   pais: {
     type: DataTypes.STRING,
   },
@@ -48,16 +49,24 @@ const Usuario = sequelize.define("Usuario", {
     allowNull: false,
   },
   rol: {
-  type: DataTypes.STRING,
-  allowNull: false,
-  defaultValue: "cliente",
-  validate: {
-    isIn: [["cliente", "asesor", "admin"]],
+    type: DataTypes.STRING,
+    allowNull: false,
+    defaultValue: "cliente",
+    validate: {
+      isIn: [["cliente", "asesor", "admin"]],
+    },
   },
-},
+  // --- CAMPO NUEVO Y ESENCIAL ---
+  area: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    validate: {
+        isIn: [['Contable', 'Administrativa', 'Empresarial', 'Legal', null]]
+    }
+  }
 }, {
-  tableName: "usuarios", // ⚠️ DEBE coincidir con tu tabla
-  timestamps: false      // si tu tabla no usa createdAt y updatedAt
+  tableName: "usuarios",
+  timestamps: false
 });
 
 module.exports = Usuario;

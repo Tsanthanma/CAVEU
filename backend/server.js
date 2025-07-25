@@ -1,3 +1,4 @@
+// backend/server.js
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
@@ -10,7 +11,7 @@ dotenv.config();
 // Inicializar Express
 const app = express();
 
-// Middleware CORS (ajusta origin si usas otro puerto)
+// Middleware CORS
 app.use(cors({
   origin: "http://localhost:3000",
   credentials: true
@@ -25,6 +26,7 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // Rutas API
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/tickets", require("./routes/ticketRoutes"));
+app.use("/api/usuarios", require("./routes/userRoutes")); // <--- ESTA ES LA LÍNEA AÑADIDA
 
 // Ruta de prueba
 app.get("/", (req, res) => {
@@ -38,7 +40,7 @@ const PORT = process.env.PORT || 5000;
 sequelize.authenticate()
   .then(() => {
     console.log("✅ Conectado a MySQL con Sequelize");
-    return sequelize.sync({ force: false }); // true borra y recrea las tablas
+    return sequelize.sync({ force: false });
   })
   .then(() => {
     app.listen(PORT, () => {

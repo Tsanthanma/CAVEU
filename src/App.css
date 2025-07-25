@@ -296,3 +296,47 @@ input, select, textarea {
   border-radius: 4px;
 }
 
+
+/* ... (todos tus estilos existentes) ... */
+
+/* Estilos para la navegación de pestañas en los dashboards */
+.dashboard-nav {
+  border-bottom: 2px solid #eee;
+  margin-bottom: 20px;
+}
+.dashboard-nav button {
+  background: none;
+  border: none;
+  padding: 15px 20px;
+  cursor: pointer;
+  font-size: 16px;
+  color: #555;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+}
+.dashboard-nav button.active {
+  color: #0056b3;
+  border-bottom-color: #0056b3;
+  font-weight: 600;
+}
+
+/* Estilos para el Modal del CRUD Admin */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1050;
+}
+.modal {
+  background: white;
+  padding: 25px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+}
