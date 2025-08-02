@@ -2,18 +2,23 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import Perfil from "../components/Perfil";
+import HistorialModal from "../components/HistorialModal";
 
 const DashboardAsesor = () => {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
-
-  // **CORRECCIÓN CLAVE**: Usamos useMemo para que el objeto de usuario no se cree en cada render.
-  // Esto rompe el bucle infinito de "Cargando...".
   const usuario = useMemo(() => JSON.parse(localStorage.getItem("usuario")), []);
 
   const [vista, setVista] = useState('tickets');
   const [tickets, setTickets] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  
+  const [isResponderOpen, setIsResponderOpen] = useState(false);
+  const [respuestaTexto, setRespuestaTexto] = useState("");
+  const [ticketAResponder, setTicketAResponder] = useState(null);
+  
+  const [isHistorialOpen, setIsHistorialOpen] = useState(false);
+  const [selectedTicketId, setSelectedTicketId] = useState(null);
 
   const handleLogout = useCallback(() => {
     localStorage.clear();
@@ -49,32 +54,62 @@ const DashboardAsesor = () => {
     }
   }, [vista, obtenerTicketsAsignados]);
 
-  const handleMarcarResuelto = async (ticketId) => {
+  const registrarAccion = useCallback(async (ticketId, accion, detalle = null) => {
+    try {
+      await fetch(`http://localhost:5000/api/historial`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ ticketId, accion, detalle })
+      });
+    } catch (error) {
+      console.error("No se pudo registrar la acción en el historial:", error);
+    }
+  }, [token]);
+
+  const handleMarcarResuelto = useCallback(async (ticketId) => {
     try {
       const res = await fetch(`http://localhost:5000/api/tickets/${ticketId}/estado`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ estado: 'resuelto' })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.msg || 'No se pudo actualizar el ticket.');
+
+      await registrarAccion(ticketId, "Ticket marcado como resuelto");
       alert('Ticket marcado como resuelto.');
       obtenerTicketsAsignados();
     } catch (error) {
-      console.error("Error al marcar como resuelto:", error);
       alert(error.message);
     }
+  }, [token, obtenerTicketsAsignados, registrarAccion]);
+
+  const abrirModalRespuesta = (ticket) => {
+    setTicketAResponder(ticket);
+    setIsResponderOpen(true);
   };
-  
-  const enviarCorreo = (emailCliente, pregunta) => {
-    const asunto = encodeURIComponent(`Respuesta a tu consulta: "${pregunta.substring(0, 20)}..."`);
-    const cuerpo = encodeURIComponent(
-      `Hola,\n\nEn respuesta a tu consulta: "${pregunta}"\n\n[Escribe tu respuesta aquí...]\n\nSaludos,\n${usuario.nombres}, tu asesor de CAVE-U`
-    );
-    window.location.href = `mailto:${emailCliente}?subject=${asunto}&body=${cuerpo}`;
+
+  const handleEnviarRespuesta = async (e) => {
+    e.preventDefault();
+    if (!respuestaTexto.trim()) {
+      alert("La respuesta no puede estar vacía.");
+      return;
+    }
+    
+    await registrarAccion(ticketAResponder.id, "Respuesta de asesor", respuestaTexto);
+    
+    alert("Respuesta enviada y guardada en el historial.");
+    setIsResponderOpen(false);
+    setRespuestaTexto("");
+    setTicketAResponder(null);
+  };
+
+  const abrirHistorial = (ticketId) => {
+    setSelectedTicketId(ticketId);
+    setIsHistorialOpen(true);
   };
 
   return (
@@ -95,25 +130,19 @@ const DashboardAsesor = () => {
             <section>
                 <h3>📥 Tickets asignados a ti</h3>
                 {isLoading ? <p>Cargando tickets...</p> : (
-                    tickets.length === 0 ? (
-                        <p>No tienes tickets asignados en este momento.</p>
-                    ) : (
+                    tickets.length === 0 ? <p>No tienes tickets asignados en este momento.</p> : (
                         <ul style={{ listStyle: 'none', padding: 0 }}>
                             {tickets.map((ticket) => (
                             <li key={ticket.id} className="ticket-item" style={{ background: '#f9f9f9', padding: '15px', borderRadius: '8px', marginBottom: '15px' }}>
                                 <p><strong>Cliente:</strong> {`${ticket.usuario?.nombres || ''} ${ticket.usuario?.apellidos || ''}`.trim() || "Desconocido"}</p>
-                                <p><strong>Correo del Cliente:</strong> {ticket.usuario?.email || "No disponible"}</p>
                                 <p><strong>Consulta:</strong> {ticket.pregunta}</p>
-                                <p><strong>Fecha de Asignación:</strong> {new Date(ticket.updatedAt).toLocaleString()}</p>
                                 <p><strong>Estado:</strong> <span className={`estado-${ticket.estado.replace(' ', '-')}`}>{ticket.estado}</span></p>
-                                {ticket.archivo && <p><strong>Archivo Adjunto:</strong> <a href={`http://localhost:5000/uploads/${ticket.archivo}`} target="_blank" rel="noopener noreferrer">Ver archivo</a></p>}
-                                <div style={{marginTop: '15px', display: 'flex', gap: '10px'}}>
-                                <button className="btn primary" onClick={() => enviarCorreo(ticket.usuario?.email, ticket.pregunta)} disabled={ticket.estado === 'resuelto'}>
-                                    Responder por Correo
-                                </button>
-                                <button className="btn secondary" onClick={() => handleMarcarResuelto(ticket.id)} disabled={ticket.estado === 'resuelto'}>
-                                    {ticket.estado === 'resuelto' ? 'Ya Resuelto' : 'Marcar como Resuelto'}
-                                </button>
+                                <div style={{marginTop: '15px', display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
+                                  <button className="btn primary" onClick={() => abrirModalRespuesta(ticket)} disabled={ticket.estado === 'resuelto'}>
+                                      Responder
+                                  </button>
+                                  <button className="btn secondary" onClick={() => handleMarcarResuelto(ticket.id)} disabled={ticket.estado === 'resuelto'}>{ticket.estado === 'resuelto' ? 'Ya Resuelto' : 'Marcar Resuelto'}</button>
+                                  <button className="btn" style={{backgroundColor: '#6c757d'}} onClick={() => abrirHistorial(ticket.id)}>Ver Historial</button>
                                 </div>
                             </li>
                             ))}
@@ -125,7 +154,27 @@ const DashboardAsesor = () => {
 
         {vista === 'perfil' && <Perfil />}
       </div>
-      <footer className="footer"><p>&copy; 2025 CAVE-U. Todos los derechos Reservados. UNIMINUTO ©2025</p></footer>
+      
+      {isHistorialOpen && <HistorialModal ticketId={selectedTicketId} token={token} onClose={() => setIsHistorialOpen(false)} />}
+      
+      {isResponderOpen && (
+          <div className="modal-backdrop">
+              <div className="modal">
+                  <h3>Responder al Ticket #{ticketAResponder.id}</h3>
+                  <p><strong>Consulta del cliente:</strong> {ticketAResponder.pregunta}</p>
+                  <form onSubmit={handleEnviarRespuesta}>
+                      <label htmlFor="respuestaTexto">Tu respuesta:</label>
+                      <textarea id="respuestaTexto" rows="6" value={respuestaTexto} onChange={(e) => setRespuestaTexto(e.target.value)} style={{width: '100%', fontSize: '16px', padding: '10px'}} required />
+                      <div style={{display: 'flex', gap: '10px', marginTop: '20px'}}>
+                          <button type="submit" className="btn primary">Enviar Respuesta</button>
+                          <button type="button" onClick={() => setIsResponderOpen(false)} className="btn secondary">Cancelar</button>
+                      </div>
+                  </form>
+              </div>
+          </div>
+      )}
+
+      <footer className="footer"><p>&copy; 2025 CAVE-U. UNIMINUTO ©2025</p></footer>
     </>
   );
 };

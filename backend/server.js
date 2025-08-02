@@ -26,7 +26,8 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // Rutas API
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/tickets", require("./routes/ticketRoutes"));
-app.use("/api/usuarios", require("./routes/userRoutes")); // <--- ESTA ES LA LÍNEA AÑADIDA
+app.use("/api/usuarios", require("./routes/userRoutes"));
+app.use("/api/historial", require("./routes/historialRoutes")); // <-- ESTA ES LA LÍNEA QUE NECESITAS AÑADIR
 
 // Ruta de prueba
 app.get("/", (req, res) => {

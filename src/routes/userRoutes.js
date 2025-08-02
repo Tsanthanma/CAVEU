@@ -10,4 +10,4 @@ router.get("/", verifyToken, getUsuarios);
 // Ruta para obtener solo los asesores (protegida)
 router.get("/asesores", verifyToken, getAsesores);
 
-module.exports = router;
+module.exports = router; 

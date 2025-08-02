@@ -1,4 +1,4 @@
-// src/models/Ticket.js
+// backend/models/Ticket.js
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 const Usuario = require('./Usuario');
@@ -6,7 +6,7 @@ const Usuario = require('./Usuario');
 const Ticket = sequelize.define('Ticket', {
   pregunta: {
     type: DataTypes.STRING,
-    allowNull: true // Permitir nulo si solo se envía archivo
+    allowNull: true
   },
   archivo: {
     type: DataTypes.STRING
@@ -18,7 +18,6 @@ const Ticket = sequelize.define('Ticket', {
   area: {
     type: DataTypes.STRING
   },
-  // IDs para las relaciones
   usuarioId: {
     type: DataTypes.INTEGER,
     allowNull: false
@@ -31,17 +30,8 @@ const Ticket = sequelize.define('Ticket', {
   timestamps: true
 });
 
-// Relaciones
-Ticket.belongsTo(Usuario, {
-  as: 'usuario',
-  foreignKey: 'usuarioId',
-  onDelete: 'CASCADE'
-});
-
-Ticket.belongsTo(Usuario, {
-  as: 'asesor',
-  foreignKey: 'asesorId',
-  allowNull: true
-});
+// Relaciones del Ticket
+Ticket.belongsTo(Usuario, { as: 'usuario', foreignKey: 'usuarioId', onDelete: 'CASCADE' });
+Ticket.belongsTo(Usuario, { as: 'asesor', foreignKey: 'asesorId' });
 
 module.exports = Ticket;

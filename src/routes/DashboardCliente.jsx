@@ -1,18 +1,22 @@
 // frontend/src/routes/DashboardCliente.jsx
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import Perfil from "../components/Perfil";
+import HistorialModal from "../components/HistorialModal";
 
 const ClienteDashboard = () => {
   const navigate = useNavigate();
-  const usuario = JSON.parse(localStorage.getItem("usuario"));
   const token = localStorage.getItem("token");
+  const usuario = useMemo(() => JSON.parse(localStorage.getItem("usuario")), []);
 
   const [vista, setVista] = useState('tickets');
   const [pregunta, setPregunta] = useState("");
   const [archivo, setArchivo] = useState(null);
   const [tickets, setTickets] = useState([]);
   const [cargando, setCargando] = useState(false);
+  
+  const [isHistorialOpen, setIsHistorialOpen] = useState(false);
+  const [selectedTicketId, setSelectedTicketId] = useState(null);
 
   const handleLogout = useCallback(() => {
     localStorage.clear();
@@ -76,6 +80,11 @@ const ClienteDashboard = () => {
     }
   };
 
+  const abrirHistorial = (ticketId) => {
+    setSelectedTicketId(ticketId);
+    setIsHistorialOpen(true);
+  };
+
   return (
     <>
       <header><h1>Consultorio Académico Virtual Empresarial Uniminuto</h1></header>
@@ -109,11 +118,11 @@ const ClienteDashboard = () => {
                     {tickets.map(ticket => (
                     <li key={ticket.id} className="ticket-item" style={{ background: '#f9f9f9', padding: '15px', borderRadius: '8px', marginBottom: '15px' }}>
                         <p><strong>Consulta:</strong> {ticket.pregunta}</p>
-                        <p><strong>Fecha:</strong> {new Date(ticket.createdAt).toLocaleDateString()}</p>
                         <p><strong>Estado:</strong> {ticket.estado}</p>
-                        {/* LÍNEA MODIFICADA PARA MOSTRAR EL ASESOR */}
-                        <p><strong>Asesor:</strong> {ticket.asesor ? `${ticket.asesor.nombres} ${ticket.asesor.apellidos}` : 'Aún no asignado'}</p>
-                        {ticket.archivo && <p><strong>Archivo:</strong> <a href={`http://localhost:5000/uploads/${ticket.archivo}`} target="_blank" rel="noopener noreferrer">Ver archivo</a></p>}
+                        <p><strong>Asesor:</strong> {ticket.asesor ? `${ticket.asesor.nombres} ${ticket.asesor.apellidos}`.trim() : 'Aún no asignado'}</p>
+                        <button className="btn" style={{backgroundColor: '#6c757d', marginTop: '10px'}} onClick={() => abrirHistorial(ticket.id)}>
+                            Ver Detalles y Respuestas
+                        </button>
                     </li>
                     ))}
                 </ul>
@@ -123,6 +132,8 @@ const ClienteDashboard = () => {
         
         {vista === 'perfil' && <Perfil />}
       </div>
+
+      {isHistorialOpen && <HistorialModal ticketId={selectedTicketId} token={token} onClose={() => setIsHistorialOpen(false)} />}
       <footer className="footer"><p>&copy; 2025 CAVE-U. Todos los derechos Reservados. UNIMINUTO ©2025</p></footer>
     </>
   );
