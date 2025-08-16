@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 const Registro = () => {
   const navigate = useNavigate();
@@ -81,7 +82,7 @@ const Registro = () => {
     };
 
     try {
-      const respuesta = await fetch("http://localhost:5000/api/auth/registro", {
+      const respuesta = await fetch('${API_URL}/api/auth/registro', { // Cambia a la URL de tu API
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(nuevoUsuario),
