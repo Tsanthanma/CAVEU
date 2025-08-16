@@ -2,6 +2,9 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
+// ✅ 1. DEFINE LA VARIABLE DE ENTORNO AQUÍ
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
 const Login = () => {
   const [documento, setDocumento] = useState("");
   const [password, setPassword] = useState("");
@@ -12,7 +15,8 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/auth/login", {
+      // ✅ 2. USA LA VARIABLE CON BACKTICKS (`) AQUÍ
+      const res = await fetch(`${API_URL}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ documento, password }),
