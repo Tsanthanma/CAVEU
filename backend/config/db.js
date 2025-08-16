@@ -1,11 +1,17 @@
-// backend/config/db.js
-
 const { Sequelize } = require('sequelize');
+require('dotenv').config(); // Carga las variables de .env para desarrollo local
 
-const sequelize = new Sequelize('caveu_db', 'root', '12345678', {
-  host: 'localhost',
-  dialect: 'mysql',
-  logging: false, // Opcional: desactiva los logs SQL en consola
-});
+// Esta configuración funcionará tanto en tu PC como en Railway
+const sequelize = new Sequelize(
+  process.env.MYSQLDATABASE || 'caveu_db',      // Nombre de la DB
+  process.env.MYSQLUSER || 'root',              // Usuario
+  process.env.MYSQLPASSWORD || '12345678',      // Contraseña
+  {
+    host: process.env.MYSQLHOST || 'localhost', // Host
+    port: process.env.MYSQLPORT || 3306,        // Puerto
+    dialect: 'mysql',
+    logging: false,
+  }
+);
 
 module.exports = sequelize;
