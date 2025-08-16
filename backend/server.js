@@ -11,9 +11,20 @@ dotenv.config();
 // Inicializar Express
 const app = express();
 
-// Middleware CORS
+// --- SECCIÓN DE CORS CORREGIDA ---
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://caveu.vercel.app' // Sin la barra al final
+];
+
 app.use(cors({
-  origin: "http://localhost:3000",
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Acceso CORS no permitido para este origen.'));
+    }
+  },
   credentials: true
 }));
 
