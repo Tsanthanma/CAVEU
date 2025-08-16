@@ -82,7 +82,7 @@ const Registro = () => {
     };
 
     try {
-      const respuesta = await fetch('${API_URL}/api/auth/registro', { // Cambia a la URL de tu API
+      const respuesta = await fetch(`${API_URL}/api/auth/registro`, { // Cambia a la URL de tu API
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(nuevoUsuario),
