@@ -11,14 +11,17 @@ dotenv.config();
 // Inicializar Express
 const app = express();
 
-// --- SECCIÓN DE CORS CORREGIDA ---
+// --- SECCIÓN DE CORS MODIFICADA PARA DEPURAR ---
 const allowedOrigins = [
   'http://localhost:3000',
-  'https://caveu.vercel.app' // Sin la barra al final
+  'https://caveu.vercel.app' // Esta es la URL que *creemos* correcta
 ];
 
 app.use(cors({
   origin: function (origin, callback) {
+    // Esta línea nos dirá la verdad en los logs de Render
+    console.log('>>> Origen de la petición:', origin); 
+
     if (!origin || allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
@@ -27,6 +30,7 @@ app.use(cors({
   },
   credentials: true
 }));
+// --- FIN DE LA SECCIÓN DE CORS ---
 
 // Middleware para leer JSON
 app.use(express.json());
@@ -38,7 +42,7 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/tickets", require("./routes/ticketRoutes"));
 app.use("/api/usuarios", require("./routes/userRoutes"));
-app.use("/api/historial", require("./routes/historialRoutes")); // <-- ESTA ES LA LÍNEA QUE NECESITAS AÑADIR
+app.use("/api/historial", require("./routes/historialRoutes"));
 
 // Ruta de prueba
 app.get("/", (req, res) => {
